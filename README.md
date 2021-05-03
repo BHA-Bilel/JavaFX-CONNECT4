@@ -1,7 +1,6 @@
-# JavaFX-CONNECT4
-# JavaFX-CHESS 🕹️
+# JavaFX-CONNECT4 🕹️
 
-> Play Chess with your friends online!
+> Play Connect 4 with your friends online!
 > 
 > Jump to the [Setup](#setup) section to to download the game, enjoy!
 > 
