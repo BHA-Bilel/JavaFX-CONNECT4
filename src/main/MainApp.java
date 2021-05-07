@@ -6,10 +6,12 @@ import game.GameApp;
 import gfx.Assets;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Menu;
@@ -17,6 +19,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -26,11 +29,14 @@ import room.RoomApp;
 import shared.Game;
 import shared.MainRequest;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.RenderedImage;
 import java.io.*;
-import java.net.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -39,6 +45,7 @@ public class MainApp extends Application {
     public static String SERVER_IP;
     public static int MAIN_PORT;
     public static int GAME_PORT = -1;
+    private static final String CURRENT_VERSION = "1.0";
 
     private boolean valid;
     public static final Game THIS_GAME = Game.CONNECT4;
@@ -119,7 +126,7 @@ public class MainApp extends Application {
 
                     alert.getButtonTypes().setAll(retry, enter_new, cancel1);
                     Optional<ButtonType> res = alert.showAndWait();
-                    if (!res.isPresent() || res.get() == cancel1) {
+                    if (res.isEmpty() || res.get() == cancel1) {
                         System.exit(0);
                     }
                     if (res.get() == retry) {
@@ -175,7 +182,7 @@ public class MainApp extends Application {
 
     private void readConfigFile() {
         Properties prop = new Properties();
-        try (FileInputStream ip = new FileInputStream("src/shared/config.properties")) {
+        try (InputStream ip = MainApp.class.getResourceAsStream("/config.properties")) {
             prop.load(ip);
             MainApp.SERVER_IP = prop.getProperty("SERVER_IP");
             MainApp.MAIN_PORT = Integer.parseInt(prop.getProperty("PORT"));
@@ -214,26 +221,45 @@ public class MainApp extends Application {
         root.setTop(top);
         root.setCenter(center);
         Scene scene = new Scene(root);
-        Path path = Paths.get("src/main/application.css");
-        try {
-            scene.getStylesheets().add(path.toUri().toURL().toExternalForm());
-        } catch (MalformedURLException ignore) {
-        }
+        scene.getStylesheets().add(MainApp.class.getResource("/application.css").toExternalForm());
+        stage.setTitle("JavaFX-" + THIS_GAME);
         stage.setScene(scene);
         stage.show();
-        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            root.setMinWidth(stage.getWidth() * Assets.unscale_width - width_diff * Assets.unscale_width);
-        });
+        stage.widthProperty().addListener((obs, oldVal, newVal) -> root.setMinWidth(stage.getWidth() * Assets.unscale_width - width_diff * Assets.unscale_width));
 
-        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            root.setMinHeight(stage.getHeight() * Assets.unscale_height - height_diff * Assets.unscale_height);
-        });
+        stage.heightProperty().addListener((obs, oldVal, newVal) -> root.setMinHeight(stage.getHeight() * Assets.unscale_height - height_diff * Assets.unscale_height));
         Assets.mainApp_width = stage.getWidth();
         Assets.mainApp_height = stage.getHeight();
         width_diff = stage.getWidth() - scene.getWidth();
         height_diff = stage.getHeight() - scene.getHeight();
         update_width_height(Assets.mainApp_width, Assets.mainApp_height);
         stage.setOnCloseRequest(e -> System.exit(0));
+
+//        setup_snap_tool();
+    }
+
+    private void setup_snap_tool() { // method to take screenshots of scene
+        Stage snapshot_stage = new Stage();
+        VBox snapshot_root = new VBox();
+        TextField fname = new TextField();
+        JFXButton snapshot = new JFXButton("take snapshot!");
+        snapshot.setOnAction(e -> {
+            WritableImage image = root.snapshot(new SnapshotParameters(), null);
+            File file = new File("screenshots/" + fname.getText() + ".png");
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(image, null);
+            try {
+                ImageIO.write(
+                        renderedImage,
+                        "png",
+                        file);
+            } catch (IOException ignore) {
+            }
+
+        });
+        snapshot_root.getChildren().addAll(fname, snapshot);
+        Scene snapshot_scene = new Scene(snapshot_root);
+        snapshot_stage.setScene(snapshot_scene);
+        snapshot_stage.show();
     }
 
     public void update_width_height(double width, double height) {
@@ -251,46 +277,196 @@ public class MainApp extends Application {
 
     private MenuBar createTopGUI() {
         MenuBar top = new MenuBar();
-        Menu options = new Menu("Options");
+
+        Menu about_menu = new Menu("About");
         MenuItem about = new MenuItem("About Me");
+        MenuItem help = new MenuItem("Help");
+        MenuItem feedback = new MenuItem("Give feedback");
+        MenuItem copyright = new MenuItem("Copyright notice");
+
         Menu exit = new Menu("Return to..");
         MenuItem return_room = new MenuItem("Return to Room (exit game)");
         MenuItem return_main = new MenuItem("Return Home (exit join/room)");
         MenuItem return_desktop = new MenuItem("Return to Desktop (exit application)");
 
-        options.getItems().addAll(about);
+        Menu download_update = new Menu("Download/Update");
+        MenuItem du_xo = new MenuItem("XO");
+        MenuItem du_checkers = new MenuItem("Checkers");
+        MenuItem du_chess = new MenuItem("Chess");
+        MenuItem du_connect4 = new MenuItem("Connect4");
+        MenuItem du_dominoes = new MenuItem("Dominoes");
+        MenuItem du_coinche = new MenuItem("Coinche");
+
+        download_update.getItems().addAll(du_xo, du_checkers, du_chess,
+                du_connect4, du_dominoes, du_coinche);
+
+        about_menu.getItems().addAll(about, help, feedback, copyright);
         exit.getItems().addAll(return_room, return_main, return_desktop);
-        top.getMenus().addAll(options, exit);
+        top.getMenus().addAll(download_update, exit, about_menu);
+
+        du_xo.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            ButtonType du_button;
+
+            alert.setTitle("Download");
+            alert.setHeaderText("Want to play XO with your friends?");
+            alert.setContentText("Download my XO app for free");
+            du_button = new ButtonType("Download now!");
+
+            alert.getButtonTypes().add(du_button);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == du_button)
+                open_url("https://github.com/BHA-Bilel/JavaFX-XO#setup");
+        });
+
+        du_checkers.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            ButtonType du_button;
+
+            alert.setTitle("Download");
+            alert.setHeaderText("Want to play Checkers with your friends?");
+            alert.setContentText("Download my Checkers app for free");
+            du_button = new ButtonType("Download now!");
+
+            alert.getButtonTypes().add(du_button);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == du_button)
+                open_url("https://github.com/BHA-Bilel/JavaFX-CHECKERS#setup");
+        });
+
+        du_chess.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            ButtonType du_button;
+
+            alert.setTitle("Download");
+            alert.setHeaderText("Want to play Chess with your friends?");
+            alert.setContentText("Download my Chess app for free");
+            du_button = new ButtonType("Download now!");
+
+            alert.getButtonTypes().add(du_button);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == du_button)
+                open_url("https://github.com/BHA-Bilel/JavaFX-CHESS#setup");
+        });
+
+        du_connect4.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            ButtonType du_button;
+
+            alert.setTitle("Update");
+            alert.setHeaderText("Make sure you have the latest version of Connect 4!");
+            alert.setContentText("Your current version is : " + CURRENT_VERSION);
+            du_button = new ButtonType("Check for new version");
+
+            alert.getButtonTypes().add(du_button);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == du_button)
+                open_url("https://github.com/BHA-Bilel/JavaFX-CONNECT4#setup");
+        });
+
+        du_dominoes.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            ButtonType du_button;
+
+            alert.setTitle("Download");
+            alert.setHeaderText("Want to play Dominoes with your friends?");
+            alert.setContentText("Download my Dominoes app for free");
+            du_button = new ButtonType("Download now!");
+
+            alert.getButtonTypes().add(du_button);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == du_button)
+                open_url("https://github.com/BHA-Bilel/JavaFX-DOMINOS#setup");
+        });
+
+        du_coinche.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            ButtonType du_button;
+
+            alert.setTitle("Download");
+            alert.setHeaderText("Want to play Coinche with your friends?");
+            alert.setContentText("Download my Coinche app for free");
+            du_button = new ButtonType("Download now!");
+
+            alert.getButtonTypes().add(du_button);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == du_button)
+                open_url("https://github.com/BHA-Bilel/JavaFX-COINCHE#setup");
+        });
+
         about.setOnAction(e -> {
             Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("BHA Bilel");
+            alert.setTitle("BHA-Bilel sends his regards");
             alert.setHeaderText("Hello! my name is BENHADJ AMAR Bilel");
-            alert.setContentText("Thanks for playing my game :)");
-            ButtonType visit_linkedin = new ButtonType("Visit my LinkedIn profile");
-            ButtonType visit_github = new ButtonType("Visit my Github profile");
-            alert.getButtonTypes().addAll(visit_linkedin, visit_github);
-            Optional<ButtonType> res = alert.showAndWait();
-            boolean visit_li = res.get() == visit_linkedin, visit_gh = res.get() == visit_github;
-            if (visit_li || visit_gh) {
-                String url = visit_li ? "https://www.linkedin.com/in/bilel-bha/" : "https://github.com/BHA-Bilel";
+            alert.setContentText("Thanks for playing my game :)\n" +
+                    "Find out more about me:");
 
-                String myOS = System.getProperty("os.name").toLowerCase();
-                try {
-                    if (Desktop.isDesktopSupported()) { // Probably Windows
-                        Desktop desktop = Desktop.getDesktop();
-                        desktop.browse(new URI(url));
-                    } else { // Definitely Non-windows
-                        Runtime runtime = Runtime.getRuntime();
-                        if (myOS.contains("mac")) { // Apples
-                            runtime.exec("open " + url);
-                        } else if (myOS.contains("nix") || myOS.contains("nux")) { // Linux flavours
-                            runtime.exec("xdg-open " + url);
-                        }
-                    }
-                } catch (IOException | URISyntaxException ignore) {
+            ButtonType visit_gh = new ButtonType("Visit GitHub profile");
+            ButtonType visit_li = new ButtonType("Visit LinkedIn profile");
+
+            alert.getButtonTypes().addAll(visit_gh, visit_li);
+
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent()) {
+                boolean visit_linkedin = res.get() == visit_li, visit_github = res.get() == visit_gh;
+                if (visit_linkedin || visit_github) {
+                    String url = visit_linkedin ? "https://www.linkedin.com/in/bilel-bha/" : "https://github.com/BHA-Bilel";
+                    open_url(url);
                 }
             }
         });
+
+        help.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Help");
+            alert.setHeaderText("You don't know how to use my app ?");
+            alert.setContentText("Check out how to play");
+
+            ButtonType get_help = new ButtonType("I need help!");
+
+            alert.getButtonTypes().add(get_help);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == get_help)
+                open_url("https://github.com/BHA-Bilel/JavaFX-CONNECT4#how-to-play");
+        });
+
+        feedback.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Feedback");
+            alert.setHeaderText("What do you think of this project? leave your thoughts/recommendations !");
+            alert.setContentText("You need to have a GitHub profile");
+
+            ButtonType give_feedback = new ButtonType("Give feedback!");
+
+            alert.getButtonTypes().add(give_feedback);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == give_feedback)
+                open_url("https://gist.github.com/BHA-Bilel/8bd1e48295e4ddaa446384879eced441");
+        });
+
+        copyright.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Copyright notice");
+            alert.setHeaderText("""
+                    This game contain purposely UNLICENSED source code (NOT open-source),
+                    that I only consider as a personal side project and a way to showcase my skills.
+                    You can surely and gladly play my game, or view how it's made on GitHub.
+                       """);
+            alert.setContentText("""
+                    However, I DO NOT grant any kind of usage (Commercial, Patent, Private),
+                    Distribution or Modification of the source code of this game.
+                                
+                    For a private license agreement please contact me at: bilel.bha.pro@gmail.com""");
+            ButtonType open_project = new ButtonType("See project on GitHub");
+
+            alert.getButtonTypes().add(open_project);
+            Optional<ButtonType> res = alert.showAndWait();
+            if (res.isPresent() && res.get() == open_project) {
+                open_url("https://github.com/BHA-Bilel/JavaFX-CONNECT4");
+            }
+
+        });
+
         return_room.setOnAction(e -> {
             if (roomApp != null) {
                 roomApp.endGame();
@@ -301,6 +477,7 @@ public class MainApp extends Application {
                 alert.show();
             }
         });
+
         return_desktop.setOnAction(e -> {
             if (roomApp != null) {
                 roomApp.returnHome(false);
@@ -309,6 +486,7 @@ public class MainApp extends Application {
             }
             System.exit(0);
         });
+
         return_main.setOnAction(e -> {
             if (!in_main_menu) {
                 prevent_user_interactions();
@@ -327,6 +505,24 @@ public class MainApp extends Application {
             }
         });
         return top;
+    }
+
+    private void open_url(String url) {
+        String myOS = System.getProperty("os.name").toLowerCase();
+        try {
+            if (Desktop.isDesktopSupported()) { // Probably Windows
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI(url));
+            } else { // Definitely Non-windows
+                Runtime runtime = Runtime.getRuntime();
+                if (myOS.contains("mac")) { // Apples
+                    runtime.exec("open " + url);
+                } else if (myOS.contains("nix") || myOS.contains("nux")) { // Linux flavours
+                    runtime.exec("xdg-open " + url);
+                }
+            }
+        } catch (IOException | URISyntaxException ignore) {
+        }
     }
 
     private VBox createCenterGUI() {
@@ -556,10 +752,6 @@ public class MainApp extends Application {
         }
         update_width_height(Assets.joinApp_width, Assets.joinApp_height);
         allow_user_interactions();
-    }
-
-    public void fitStageToScene() {
-        stage.sizeToScene();
     }
 
     public void setRoomApp(RoomApp roomApp) {

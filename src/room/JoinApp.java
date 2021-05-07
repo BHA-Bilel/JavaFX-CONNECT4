@@ -52,6 +52,7 @@ public class JoinApp extends VBox {
         HBox.setMargin(bottom_hb, new Insets(50, 50, 0, 50));
         JFXButton return_home = new JFXButton("Return Home");
         return_home.setMinSize(JFXButton.USE_PREF_SIZE, JFXButton.USE_PREF_SIZE);
+        return_home.getStyleClass().add("kick");
         return_home.setOnAction(e -> returnHome(false));
         JFXButton refreshButton = new JFXButton("Refresh");
         refreshButton.setMinSize(JFXButton.USE_PREF_SIZE, JFXButton.USE_PREF_SIZE);
