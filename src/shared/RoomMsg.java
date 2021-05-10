@@ -1,14 +1,9 @@
 package shared;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public class RoomMsg implements Serializable {
 
-	/**
-	 * 
-	 */
-	@Serial
 	private static final long serialVersionUID = 1138364712431492550L;
 	public int from;
 	public int comm;

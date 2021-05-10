@@ -447,16 +447,16 @@ public class MainApp extends Application {
         copyright.setOnAction(e -> {
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Copyright notice");
-            alert.setHeaderText("""
-                    This game contain purposely UNLICENSED source code (NOT open-source),
-                    that I only consider as a personal side project and a way to showcase my skills.
-                    You can surely and gladly play my game, or view how it's made on GitHub.
-                       """);
-            alert.setContentText("""
-                    However, I DO NOT grant any kind of usage (Commercial, Patent, Private),
-                    Distribution or Modification of the source code of this game.
-                                
-                    For a private license agreement please contact me at: bilel.bha.pro@gmail.com""");
+            alert.setHeaderText(
+                    "This game contain purposely UNLICENSED source code (NOT open-source),\n"
+                            + "that I only consider as a personal side project and a way to showcase my skills.\n"
+                            + "You can surely and gladly play my game, or view how it's made on GitHub."
+            );
+            alert.setContentText(
+                    "However, I DO NOT grant any kind of usage (Commercial, Patent, Private),\n"
+                            + "Distribution or Modification of the source code of this game.\n"
+                            + "\n"
+                            + "For a private license agreement please contact me at: bilel.bha.pro@gmail.com");
             ButtonType open_project = new ButtonType("See project on GitHub");
 
             alert.getButtonTypes().add(open_project);
