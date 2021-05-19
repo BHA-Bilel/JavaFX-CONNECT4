@@ -1,0 +1,13 @@
+.hbox{
+	-fx-background-color : blue;
+	-fx-border-radius: 20px;
+	-fx-border-color: red;
+	-fx-border-width : 5px;
+	-fx-background-radius: 30px;
+}
+.vbox{
+	-fx-background-color : blue;
+}
+.circle{
+	-fx-fill :  white;
+}
