@@ -1,0 +1,111 @@
+.text {
+	-fx-text-fill: black;
+}
+
+.label {
+    -fx-text-fill: black;
+}
+
+.toggle-button {
+    -fx-text-fill: black;
+}
+
+.label:disabled, .label:disabled > * {
+    -fx-opacity: 1.0;
+}
+
+.jfx-text-field	{
+	-jfx-label-float : true;
+	-jfx-focus-color: blue;
+	-jfx-unfocus-color: black;
+	-fx-text-fill: black;
+}
+
+.button {
+	-fx-border-color : #4285F4;
+	-fx-border-radius : 20.0;
+	-fx-border-width : 2.0;
+	-fx-background-radius : 20.0;
+	-fx-focus-traversable: false;
+	-fx-text-fill: black;
+}
+
+.button:hover {
+	-fx-border-color : #3498DB;
+	-fx-background-color: #3498DB;
+	-fx-text-fill: white;
+}
+
+.take-place {
+	-fx-border-color : #3CB371;
+}
+
+.take-place:hover {
+	-fx-border-color : #16A085;
+	-fx-background-color: #16A085;
+}
+
+.public {
+	-fx-border-color : #0F9D58;
+	-fx-text-fill: #0F9D58;
+}
+
+.public:hover {
+	-fx-border-color : #0F9D58;
+	-fx-background-color: white;
+	-fx-text-fill: #0F9D58;
+}
+
+.public .jfx-rippler {
+	-jfx-rippler-radius : 50.0;
+    -jfx-rippler-fill : #F4B400;
+}
+
+.public:disabled, .public:disabled > * {
+    -fx-opacity: 1.0;
+}
+
+.private {
+	-fx-border-color : #F4B400;
+	-fx-text-fill: #F4B400;
+}
+
+.private:hover {
+	-fx-border-color : #F4B400;
+	-fx-background-color: white;
+	-fx-text-fill: #F4B400;
+}
+
+.private .jfx-rippler	{
+	-jfx-rippler-radius : 50.0;
+    -jfx-rippler-fill : #0F9D58;
+}
+
+.private:disabled, .private:disabled > * {
+    -fx-opacity: 1.0;
+}
+
+.kick {
+	-fx-border-color : #b71234;
+    -fx-text-fill: #b71234;
+    -fx-background-color: white;
+}
+
+.kick:hover {
+	-fx-border-color : #b71234;
+    -fx-text-fill: white;
+    -fx-background-color: #b71234;
+}
+
+.jfx-radio-button {
+	-fx-text-fill: black;
+}
+
+.jfx-check-box {
+    -fx-text-fill: black;
+    -fx-focus-traversable: false;
+}
+
+.check-box:disabled, .check-box:disabled > * {
+    -fx-opacity: 1.0;
+}

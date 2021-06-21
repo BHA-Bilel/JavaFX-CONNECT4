@@ -1,0 +1,33 @@
+* {
+    -fx-my-color: #263238;
+    -fx-my-color-highlighted: #455a64;
+    -fx-my-font-color: #FFFFFF;
+}
+
+.dialog-pane {
+    -fx-background-color: -fx-my-color;
+    -fx-text-fill:-fx-my-font-color;
+}
+
+/* Header */
+.dialog-pane:header .header-panel {
+    -fx-background-color: -fx-my-color-highlighted;
+    -fx-text-fill:-fx-my-font-color;
+}
+
+/* Content */
+.dialog-pane > .content {
+   -fx-background-color: -fx-my-color;
+   -fx-text-fill:-fx-my-font-color;
+}
+
+/* Buttons */
+.dialog-pane .button {
+	-fx-border-color : #4285F4;
+}
+
+.dialog-pane .button:hover {
+	-fx-border-color : #3498DB;
+	-fx-background-color: #3498DB;
+	-fx-text-fill: white;
+}

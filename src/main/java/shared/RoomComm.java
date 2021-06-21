@@ -7,7 +7,7 @@ public enum RoomComm {
 	REQUEST_KICK,
 	/** player with from id is requesting to change his name in adt_data */
 	REQUEST_CHANGE_NAME,
-	/** player with from id is requesting to take the empty RoomPosition in adt_data */
+	/** player with from id is requesting to take the empty xo.shared.RoomPosition in adt_data */
 	TAKE_EMPTY_PLACE,
 	/** player with from id is requesting to team up with another player with id in adt_data */
 	REQUEST_TEAM_UP,
@@ -39,7 +39,7 @@ public enum RoomComm {
 	KICKED,
 	/** player with from id changed his name */
 	CHANGED_NAME,
-	/** player with from id has taken empty RoomPosition in adt_data */
+	/** player with from id has taken empty xo.shared.RoomPosition in adt_data */
 	TOOK_EMPTY_PLACE,
 	/** player with ids in adt_data has teamed up */
 	TEAMED_UP,
@@ -52,5 +52,7 @@ public enum RoomComm {
 	/** server started the game */
 	GAME_STARTED,
 	/** server ended the game */
-	GAME_ENDED;
+	GAME_ENDED,
+	/** migration to new host's room (room_info in adt_data)  */
+	MIGRATION
 }

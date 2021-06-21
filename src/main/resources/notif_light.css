@@ -1,0 +1,8 @@
+.notification-bar>.pane .title {
+    -fx-font-size:;
+    -fx-font-weight: bold;
+}
+
+.notification-bar>.pane .label {
+    -fx-font-size:;
+}

@@ -1,0 +1,21 @@
+.root{
+	-fx-font-size: 18.0pt;
+	-fx-background-color: #181818;
+}
+
+.scroll-pane > .viewport {
+   -fx-background-color: #181818;
+}
+
+.jfx-text-field	{
+	-fx-border-width: 10.0pt;
+	-fx-text-fill: white;
+}
+
+.name {
+	-fx-text-fill: #4285F4;
+}
+
+.content {
+    -fx-text-fill: white;
+}

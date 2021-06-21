@@ -1,0 +1,11 @@
+.root{
+	-fx-font-size: 18.0pt;
+}
+
+.jfx-text-field	{
+	-fx-border-width: 10.0pt;
+}
+
+.name {
+	-fx-text-fill: #4285F4;
+}
